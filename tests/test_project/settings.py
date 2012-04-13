@@ -1,5 +1,12 @@
 import os
 DEBUG = True
+DATABASES = {
+    'default':
+        {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/tmp/piston.db'
+    }
+}
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = os.path.join(os.path.dirname(__file__), 'data.db')
 INSTALLED_APPS = (
