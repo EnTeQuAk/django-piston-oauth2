@@ -8,7 +8,17 @@ def get_oauth_request(request):
     headers = {}
     if 'HTTP_AUTHORIZATION' in request.META:
         headers['Authorization'] = request.META['HTTP_AUTHORIZATION']
-    return oauth.Request.from_request(request.method, request.build_absolute_uri(request.path), headers, dict(request.REQUEST))
+
+    # This allows you to send through duplicates in the forms. Otherwise you
+    # get an error with invalid signatures.
+    out = {}
+    for k in request.REQUEST.iterkeys():
+        v = request.REQUEST.getlist(k)
+        out[k] = request.REQUEST.get(k) if len(v) == 1 else v
+
+    return oauth.Request.from_request(request.method,
+                                      request.build_absolute_uri(request.path),
+                                      headers, out)
 
 
 def verify_oauth_request(request, oauth_request, consumer, token=None):
@@ -52,7 +62,7 @@ def require_params(oauth_request, parameters=[]):
         missing = list(param for param in params if param not in oauth_request)
     except:
         missing = params
-        
+
     if missing:
         return HttpResponseBadRequest('Missing OAuth parameters: %s' % (', '.join(missing)))
 
