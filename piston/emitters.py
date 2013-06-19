@@ -390,9 +390,10 @@ class JSONEmitter(Emitter):
         cb = request.GET.get('callback', None)
         seria = simplejson.dumps(self.construct(), cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
+        # Bug 881376.
         # Callback
-        if cb and is_valid_jsonp_callback_value(cb):
-            return '%s(%s)' % (cb, seria)
+        #if cb and is_valid_jsonp_callback_value(cb):
+        #    return '%s(%s)' % (cb, seria)
 
         return seria
 
