@@ -56,6 +56,9 @@ class rc_factory(object):
             _is_string/_base_content_is_iter flag is updated when the
             _set_content method (via the content property) is called
             """
+            def _get_content(self):
+                return HttpResponse.content.__get__(self)
+
             def _set_content(self, content):
                 """
                 Set the _container and _is_string /
@@ -77,7 +80,7 @@ class rc_factory(object):
                 else:
                     self._is_string = is_string
 
-            content = property(HttpResponse._get_content, _set_content)            
+            content = property(_get_content, _set_content)
 
         return HttpResponseWrapper(r, content_type='text/plain', status=c)
     
