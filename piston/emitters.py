@@ -22,7 +22,7 @@ except NameError:
 
 from django.db.models.query import QuerySet
 from django.db.models import Model, permalink
-from django.utils import simplejson
+import json as simplejson
 from django.utils.xmlutils import SimplerXMLGenerator
 from django.utils.encoding import smart_unicode
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -100,6 +100,16 @@ class Emitter(object):
             Dispatch, all types are routed through here.
             """
             ret = None
+            # return anything we've already seen as a string only
+            # this prevents infinite recursion in the case of recursive
+            # relationships
+
+            if thing in self.stack:
+                raise RuntimeError, (u'Circular reference detected while emitting '
+                                     'response')
+
+            self.stack.append(thing)
+
 
             if isinstance(thing, QuerySet):
                 ret = _qs(thing, fields)
@@ -124,7 +134,7 @@ class Emitter(object):
                 ret = _any(thing.all())
             else:
                 ret = smart_unicode(thing, strings_only=True)
-
+            self.stack.pop()
             return ret
 
         def _fk(data, field):
@@ -297,6 +307,7 @@ class Emitter(object):
             return dict([ (k, _any(v, fields)) for k, v in data.iteritems() ])
 
         # Kickstart the seralizin'.
+        self.stack = []
         return _any(self.data, self.fields)
 
     def in_typemapper(self, model, anonymous):
