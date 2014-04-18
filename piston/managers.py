@@ -1,5 +1,12 @@
+import django
 from django.db import models
-from django.contrib.auth.models import User
+
+# Django 1.5+ compatibility
+if django.VERSION >= (1, 5):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+else:
+    from django.contrib.auth.models import User
 
 KEY_SIZE = 18
 SECRET_SIZE = 32

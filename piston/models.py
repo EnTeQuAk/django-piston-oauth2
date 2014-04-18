@@ -1,10 +1,18 @@
 import urllib, time, urlparse
 
 # Django imports
+import django
 from django.db.models.signals import post_save, post_delete
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.mail import send_mail, mail_admins
+
+# Django 1.5+ compatibility
+if django.VERSION >= (1, 5):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+else:
+    from django.contrib.auth.models import User
 
 # Piston imports
 from managers import TokenManager, ConsumerManager, ResourceManager
