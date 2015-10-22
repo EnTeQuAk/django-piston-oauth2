@@ -1,20 +1,21 @@
 import django
 from django.db import models
 
-# Django 1.5+ compatibility
-if django.VERSION >= (1, 5):
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-else:
-    from django.contrib.auth.models import User
-
 KEY_SIZE = 18
 SECRET_SIZE = 32
+
 
 class KeyManager(models.Manager):
     '''Add support for random key/secret generation
     '''
     def generate_random_codes(self):
+        # Django 1.5+ compatibility
+        if django.VERSION >= (1, 5):
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+        else:
+            from django.contrib.auth.models import User
+
         key = User.objects.make_random_password(length=KEY_SIZE)
         secret = User.objects.make_random_password(length=SECRET_SIZE)
 
@@ -55,15 +56,15 @@ class ResourceManager(models.Manager):
         if not self._default_resource:
             self._default_resource = self.get(name=name)
 
-        return self._default_resource        
+        return self._default_resource
 
 class TokenManager(KeyManager):
     def create_token(self, consumer, token_type, timestamp, user=None):
         """
         Shortcut to create a token with random key/secret.
         """
-        token, created = self.get_or_create(consumer=consumer, 
-                                            token_type=token_type, 
+        token, created = self.get_or_create(consumer=consumer,
+                                            token_type=token_type,
                                             timestamp=timestamp,
                                             user=user)
 
@@ -72,4 +73,4 @@ class TokenManager(KeyManager):
             token.save()
 
         return token
-        
+
